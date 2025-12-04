@@ -1,0 +1,18 @@
+/* basic reset + fonts */
+html,body,#root { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f6f7fb;
+  color: #0f172a;
+}
+
+/* small helper */
+.app-shell { display: flex; height: 100vh; }
+.main-area { flex: 1; overflow: auto; padding: 24px; }
+.columns { display: flex; gap: 18px; align-items: flex-start; }
+.column { width: 360px; display: flex; flex-direction: column; gap: 12px; }
+.column-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; }
+.card-list { display: flex; flex-direction: column; gap: 12px; }
+.todo-card { border-radius: 12px; padding: 12px; box-shadow: 0 6px 14px rgba(16,24,40,0.06); background: #fff; }
+.small-muted { color: rgba(15,23,42,0.6); font-size: 0.9rem; }
