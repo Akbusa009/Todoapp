@@ -141,13 +141,19 @@ const App: React.FC = () => {
         <BlankNavbar />
         <Box className="app-shell">
           <BlankSidebar />
-          <Box className="main-area">
+          <Box
+            className="main-area"
+            sx={{
+              bgcolor: "#f5f5f7",
+            }}
+          >
             <Container maxWidth="lg">
               <Box
                 mb={3}
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
+                sx={{ pt: 6 }}
               >
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 800 }}>
@@ -165,7 +171,15 @@ const App: React.FC = () => {
                 />
               </Box>
 
-              <Box className="columns">
+              {/* Kanban board */}
+              <Box
+                className="columns"
+                sx={{
+                  display: "flex",
+                  gap: 3,
+                  pb: 5,
+                }}
+              >
                 <Column
                   title="To Do"
                   todos={todoList}

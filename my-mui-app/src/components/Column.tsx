@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import TextField from "@mui/material/TextField";  
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
 import TodoCard from "./TodoCard";
-import type { Todo, TodoPayload } from "../todoClient"; 
+import type { Todo, TodoPayload } from "../todoClient";
 
 interface ColumnProps {
   title: string;
@@ -24,7 +26,15 @@ interface ColumnProps {
   onDelete: (id: string) => void;
 }
 
-const Column: React.FC<ColumnProps> = ({ title, todos, accent = "#6366f1", statusKey, onAdd, onUpdate, onDelete }) => {
+const Column: React.FC<ColumnProps> = ({
+  title,
+  todos,
+  accent = "#6366f1",
+  statusKey,
+  onAdd,
+  onUpdate,
+  onDelete,
+}) => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Todo | null>(null);
 
@@ -83,27 +93,110 @@ const Column: React.FC<ColumnProps> = ({ title, todos, accent = "#6366f1", statu
   };
 
   return (
-    <Box className="column">
-      <Paper elevation={0} sx={{ p: 1, background: "transparent" }}>
-        <Box className="column-header" sx={{ border: `4px solid ${accent}`, background: "rgba(255,255,255,0.6)" }}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box component="span" sx={{ width: 8, height: 8, borderRadius: "50%", background: accent }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{title}</Typography>
-            <Typography className="small-muted" sx={{ ml: 1 }}>{todos.length}</Typography>
+    <Box
+      className="column"
+      sx={{
+        flex: 1,
+        minWidth: 260,
+        maxWidth: 360,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box mb={2.5}>
+        <Paper
+          elevation={0}
+          sx={{
+            bgcolor: "transparent",
+            boxShadow: "none",
+          }}
+        >
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ px: 0.5, pb: 0.5 }}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  bgcolor: accent,
+                }}
+              />
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 14,
+                  color: "#0f172a",
+                }}
+              >
+                {title}
+              </Typography>
+              <Box
+                sx={{
+                  ml: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: "999px",
+                  bgcolor: "#E5E7EB",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "#6B7280",
+                }}
+              >
+                {todos.length}
+              </Box>
+            </Box>
+
+            {statusKey === "todo" ? (
+              <IconButton
+                size="small"
+                aria-label={`Add ${title}`}
+                onClick={openAdd}
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "999px",
+                  bgcolor: "#111827",
+                  color: "#ffffff",
+                  boxShadow: "0 4px 10px rgba(15,23,42,0.3)",
+                  "&:hover": {
+                    bgcolor: "#020617",
+                  },
+                }}
+              >
+                <AddIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            ) : (
+              <Box sx={{ width: 30, height: 30 }} />
+            )}
           </Box>
 
-          {/* show + only for To Do column */}
-          {statusKey === "todo" ? (
-            <IconButton size="small" onClick={openAdd} aria-label={`Add ${title}`}>
-              <AddIcon />
-            </IconButton>
-          ) : (
-            <Box sx={{ width: 40 }} /> 
-          )}
-        </Box>
-      </Paper>
+          <Box
+            sx={{
+              mt: 0.5,
+              height: 3,
+              borderRadius: 999,
+              bgcolor: accent,
+            }}
+          />
+        </Paper>
+      </Box>
 
-      <Box className="card-list">
+      <Box
+        className="card-list"
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0,
+        }}
+      >
         {todos.map(t => (
           <TodoCard
             key={t._id}
@@ -168,12 +261,16 @@ const Column: React.FC<ColumnProps> = ({ title, todos, accent = "#6366f1", statu
         <DialogActions>
           {/* show delete only when editing */}
           {editing ? (
-            <Button color="error" onClick={handleDelete}>Delete</Button>
+            <Button color="error" onClick={handleDelete}>
+              Delete
+            </Button>
           ) : (
             <Button onClick={handleClose}>Cancel</Button>
           )}
 
-          <Button variant="contained" onClick={handleSave}>{editing ? "Save" : "Add"}</Button>
+          <Button variant="contained" onClick={handleSave}>
+            {editing ? "Save" : "Add"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
