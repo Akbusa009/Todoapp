@@ -6,7 +6,7 @@ const BlankSidebar: React.FC = () => {
     <Box
       sx={{
         width: 260,
-        background: "transparent",
+        background: "#FFFFFF",
         borderRight: "1px solid rgba(15,23,42,0.04)",
         padding: 2,
         boxSizing: "border-box",

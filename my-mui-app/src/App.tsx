@@ -23,12 +23,9 @@ import {
   type Todo,
 } from "./todoClient";
 
-import { } from "react-router-dom";
-
 const App: React.FC = () => {
   const theme = useMemo(() => getTheme("light"), []);
-  const user = getStoredUser();
-  // todos state (server-provided shape)
+  const [user] = useState(() => getStoredUser());
   const [todos, setTodos] = useState<Todo[]>([]);
 
   // filters state
@@ -46,17 +43,25 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!user) return;
+      if (!user) {
+        setTodos([]); 
+        return;
+      }
       try {
         const list = await fetchTodos();
         setTodos(list);
-      } catch (err) {
-        console.error("Failed to fetch todos:", err);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error("Failed to fetch todos:", err.message);
+        } else {
+          console.error("Failed to fetch todos:", err);
+        }
       }
     };
     load();
-  }, []);
+  }, [user]);
 
+  // CREATE
   const addTodo = async (
     payload: Omit<Parameters<typeof apiCreateTodo>[0], "status">,
     status: Todo["status"]
@@ -86,8 +91,12 @@ const App: React.FC = () => {
         files: updated.files,
       });
       setTodos((prev) => prev.map((t) => (t._id === saved._id ? saved : t)));
-    } catch (err) {
-      console.error("update todo failed", err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("update todo failed:", err.message);
+      } else {
+        console.error("update todo failed:", err);
+      }
     }
   };
 
@@ -96,24 +105,28 @@ const App: React.FC = () => {
     try {
       await apiDeleteTodo(id);
       setTodos((prev) => prev.filter((t) => t._id !== id));
-    } catch (err) {
-      console.error("delete todo failed", err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("delete todo failed:", err.message);
+      } else {
+        console.error("delete todo failed:", err);
+      }
     }
   };
 
-  // helper: match priority
+
   const matchPriority = (t: Todo) => {
     if (priorityFilter === "All") return true;
     return (t.priority ?? "Low") === priorityFilter;
   };
 
-  // helper: match date (uses server createdAt if available)
   const isInDateRange = (t: Todo) => {
     if (dateFilter === "All") return true;
     const createdAt = t.createdAt ? new Date(t.createdAt) : null;
     if (!createdAt) return true; // if missing, don't filter out
     const now = new Date();
-    if (dateFilter === "Today") return createdAt.toDateString() === now.toDateString();
+    if (dateFilter === "Today")
+      return createdAt.toDateString() === now.toDateString();
     if (dateFilter === "ThisWeek") {
       const oneWeekAgo = new Date(now);
       oneWeekAgo.setDate(now.getDate() - 7);
@@ -128,80 +141,85 @@ const App: React.FC = () => {
   };
 
   // Lists by status + filters
-  const todoList = todos.filter((t) => t.status === "todo" && matchPriority(t) && isInDateRange(t));
-  const progressList = todos.filter((t) => t.status === "progress" && matchPriority(t) && isInDateRange(t));
-  const reviewList = todos.filter((t) => t.status === "review" && matchPriority(t) && isInDateRange(t));
-  const doneList = todos.filter((t) => t.status === "done" && matchPriority(t) && isInDateRange(t));
+  const todoList = todos.filter(
+    (t) => t.status === "todo" && matchPriority(t) && isInDateRange(t)
+  );
+  const progressList = todos.filter(
+    (t) => t.status === "progress" && matchPriority(t) && isInDateRange(t)
+  );
+  const reviewList = todos.filter(
+    (t) => t.status === "review" && matchPriority(t) && isInDateRange(t)
+  );
+  const doneList = todos.filter(
+    (t) => t.status === "done" && matchPriority(t) && isInDateRange(t)
+  );
+
+  const columns = [
+    { title: "To Do", todos: todoList, accent: "#7c3aed", statusKey: "todo" },
+    {
+      title: "On Progress",
+      todos: progressList,
+      accent: "#f59e0b",
+      statusKey: "progress",
+    },
+    { title: "Review", todos: reviewList, accent: "#06b6d4", statusKey: "review" },
+    { title: "Done", todos: doneList, accent: "#16a34a", statusKey: "done" },
+  ] as const;
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box>
-        {/* BlankNavbar */}
+
         <BlankNavbar />
-        <Box className="app-shell">
+
+        <Box className="app-shell" sx={{ display: "flex", alignItems: "stretch" }}>
           <BlankSidebar />
-          <Box className="main-area">
-            <Container maxWidth="lg">
-              <Box
-                mb={3}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box>
+          <Box
+            className="main-area"
+            sx={{
+              background: "#FFFFFF",
+              minHeight: "100vh",
+              py: 6,
+              flex: 1, 
+            }}
+          >
+            
+            <Container maxWidth="lg" disableGutters sx={{ pl: 0, pr: 3 }}>
+              <Box mb={3}>
+                <Box mb={1}>
                   <Typography variant="h4" sx={{ fontWeight: 800 }}>
                     Todo App
                   </Typography>
-                  <Typography sx={{ color: "rgba(15,23,42,0.6)" }}>
-                    Project
-                  </Typography>
+                  <Typography sx={{ color: "rgba(15,23,42,0.6)" }}></Typography>
                 </Box>
-                <ControlsBar
-                  priority={priorityFilter}
-                  date={dateFilter}
-                  onPriorityChange={setPriorityFilter}
-                  onDateChange={setDateFilter}
-                />
+
+                <Box sx={{ mt: 3 }}>
+                  <ControlsBar
+                    priority={priorityFilter}
+                    date={dateFilter}
+                    onPriorityChange={setPriorityFilter}
+                    onDateChange={setDateFilter}
+                  />
+                </Box>
               </Box>
 
-              <Box className="columns">
-                <Column
-                  title="To Do"
-                  todos={todoList}
-                  accent="#7c3aed"
-                  statusKey="todo"
-                  onAdd={addTodo}
-                  onUpdate={updateTodo}
-                  onDelete={deleteTodo}
-                />
-                <Column
-                  title="On Progress"
-                  todos={progressList}
-                  accent="#f59e0b"
-                  statusKey="progress"
-                  onAdd={addTodo}
-                  onUpdate={updateTodo}
-                  onDelete={deleteTodo}
-                />
-                <Column
-                  title="Review"
-                  todos={reviewList}
-                  accent="#06b6d4"
-                  statusKey="review"
-                  onAdd={addTodo}
-                  onUpdate={updateTodo}
-                  onDelete={deleteTodo}
-                />
-                <Column
-                  title="Done"
-                  todos={doneList}
-                  accent="#16a34a"
-                  statusKey="done"
-                  onAdd={addTodo}
-                  onUpdate={updateTodo}
-                  onDelete={deleteTodo}
-                />
+              <Box
+                className="columns"
+                sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}
+              >
+                {columns.map(({ title, todos, accent, statusKey }) => (
+                  <Column
+                    key={statusKey}
+                    title={title}
+                    todos={todos}
+                    accent={accent}
+                    statusKey={statusKey}
+                    onAdd={addTodo}
+                    onUpdate={updateTodo}
+                    onDelete={deleteTodo}
+                  />
+                ))}
               </Box>
             </Container>
           </Box>

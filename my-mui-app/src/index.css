@@ -1,4 +1,3 @@
-/* basic reset + fonts */
 html,body,#root { height: 100%; }
 body {
   margin: 0;
@@ -7,7 +6,6 @@ body {
   color: #0f172a;
 }
 
-/* small helper */
 .app-shell { display: flex; height: 100vh; }
 .main-area { flex: 1; overflow: auto; padding: 24px; }
 .columns { display: flex; gap: 18px; align-items: flex-start; }

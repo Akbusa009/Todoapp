@@ -23,7 +23,7 @@ const BlankNavbar: React.FC = () => {
       color="transparent"
       sx={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
     >
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", bgcolor: "#FFFFFF"}}>
         {/* Left side empty */}
         <Box />
 

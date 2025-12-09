@@ -40,7 +40,7 @@ const Login: React.FC = () => {
 
         <Box sx={{ mt: 2, textAlign: "center" }}>
           <Typography variant="body2">
-            Don’t have an account? <RouterLink to="/signup">Sign up</RouterLink>
+            Don't have an account? <RouterLink to="/signup">Sign up</RouterLink>
           </Typography>
         </Box>
       </Box>
