@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Container, Box, Typography, TextField, Button, Alert } from "@mui/material";
+import { Container, Box, Typography, TextField, Button } from "@mui/material";
+import { toast } from "react-toastify";
 import { login } from "../authClient"
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 
@@ -7,20 +8,21 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     if (!email.trim() || !password) {
-      setError("Please fill both fields.");
+      toast.warning("Please fill both fields.");
       return;
     }
     try {
       await login(email.trim(), password);
-      navigate("/", { replace: true });
+      toast.success("Login successful!");
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1000);
     } catch {
-      setError("Invalid credentials. Try again or sign up.");
+      toast.error("Invalid credentials. Try again or sign up.");
     }
   };
 
@@ -28,8 +30,6 @@ const Login: React.FC = () => {
     <Container maxWidth="xs">
       <Box sx={{ mt: 10, p: 4, bgcolor: "background.paper", borderRadius: 2, boxShadow: 3 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>Welcome back</Typography>
-
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
           <TextField label="Email" fullWidth required margin="normal" type="email" value={email} onChange={e => setEmail(e.target.value)} />

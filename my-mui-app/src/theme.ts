@@ -10,6 +10,14 @@ export const getTheme = (mode: PaletteMode = "light") =>
       text: { primary: "#0f172a" }
     },
     shape: { borderRadius: 12 },
+
+    typography: {
+      fontFamily: "Inter, sans-serif",
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      fontWeightBold: 700,
+    },
+    
     components: {
       MuiCard: { defaultProps: { elevation: 0 } }
     }

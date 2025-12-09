@@ -27,7 +27,7 @@ export const getStoredUser = (): UserData | null => {
   return raw ? JSON.parse(raw) : null;
 };
 
-// Signup
+
 export const signup = async (name: string, email: string, password: string) => {
   const res = await client.post("/auth/signup", { name, email, password });
   const { token, user } = res.data;
@@ -35,7 +35,7 @@ export const signup = async (name: string, email: string, password: string) => {
   return user as UserData;
 };
 
-// Login
+
 export const login = async (email: string, password: string) => {
   const res = await client.post("/auth/login", { email, password });
   const { token, user } = res.data;
@@ -43,7 +43,7 @@ export const login = async (email: string, password: string) => {
   return user as UserData;
 };
 
-// Logout
+
 export const logout = () => {
   clearAuth();
 };

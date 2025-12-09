@@ -27,7 +27,7 @@ const BlankNavbar: React.FC = () => {
         {/* Left side empty */}
         <Box />
 
-        {/* Right side -> Username + Logout */}
+        {/* Right side */}
         <Box display="flex" alignItems="center" gap={2}>
           {user && (
             <Typography

@@ -6,9 +6,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import FilterListIcon from "@mui/icons-material/FilterList";
+// import FilterListIcon from "@mui/icons-material/FilterList";
 import TodayIcon from "@mui/icons-material/Today";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 type Priority = "All" | "Low" | "Medium" | "High";
 type DateRange = "All" | "Today" | "ThisWeek" | "ThisMonth";
@@ -43,18 +44,26 @@ const ControlsBar: React.FC<Props> = ({ priority, date, onPriorityChange, onDate
   };
 
   const pillSx = {
-    borderRadius: 1,
+    width: "125px",
+    height: "40px",
+    borderRadius: "6px",
     textTransform: "none",
-    minWidth: 160,
-    px: 1,
-    py: 0.6,
-    border: "2px solid rgba(15,23,42,0.06)",
-    bgcolor: "background.paper",
+    border: "1px solid rgba(120, 116, 134, 1)",
+    backgroundColor: "#FFFFFF",
     boxShadow: "none",
+    display: "flex",
+    alignItems: "center",
     justifyContent: "flex-start",
+    gap: 1,
+    px: 1.5,
+    mt:2,
+    color: "#787486",
+    fontFamily: "Inter",
+    fontSize: "16px",
+    fontWeight: 500,
   } as const;
 
-  const smallLabelSx = { fontSize: 13, color: "text.primary", fontWeight: 600 };
+  const smallLabelSx = { fontSize: 13, color: "text.primary", fontWeight: 500};
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
@@ -74,7 +83,7 @@ const ControlsBar: React.FC<Props> = ({ priority, date, onPriorityChange, onDate
             gap: 1,
           }}
         >
-          <FilterListIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <FilterAltIcon fontSize="small" sx={{ color: "text.secondary" }} />
           <Box sx={{ textAlign: "left", flex: 1 , p: 1}}>
             <Typography component="div" sx={smallLabelSx}>
               Filter
@@ -148,7 +157,7 @@ const ControlsBar: React.FC<Props> = ({ priority, date, onPriorityChange, onDate
           onClose={closeDate}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           transformOrigin={{ vertical: "top", horizontal: "right" }}
-          PaperProps={{ sx: { minWidth: 200, borderRadius: 1.5 } }}
+          // PaperProps={{ sx: { minWidth: 200, borderRadius: 1.5 } }}
         >
           <MenuItem selected={date === "All"} onClick={() => handleSelectDate("All")}>
             All dates

@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import "./index.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { getTheme } from "./theme";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -18,6 +20,19 @@ root.render(
     <ThemeProvider theme={getTheme("light")}>
       <CssBaseline />
       <BrowserRouter>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          style={{ zIndex: 9999 }}
+        />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

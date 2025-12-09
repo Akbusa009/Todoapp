@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Container, Box, Typography, TextField, Button, Alert } from "@mui/material";
+import { Container, Box, Typography, TextField, Button } from "@mui/material";
+import { toast } from "react-toastify";
 import { signup } from "../authClient"
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 
@@ -9,24 +10,25 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     if (!name.trim() || !email.trim() || !password) {
-      setError("Please fill all required fields.");
+      toast.warning("Please fill all required fields.");
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
     try {
       await signup(name.trim(), email.trim(), password);
-      navigate("/", { replace: true });
+      toast.success("Signup successful! Redirecting...");
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1500);
     } catch {
-      setError("Signup failed. Try a different email or later.");
+      toast.error("Signup failed. Try a different email or later.");
     }
   };
 
@@ -34,8 +36,6 @@ const Signup: React.FC = () => {
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, p: 4, bgcolor: "background.paper", borderRadius: 2, boxShadow: 3 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>Create account</Typography>
-
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
           <TextField label="Full name" fullWidth required margin="normal" value={name} onChange={e => setName(e.target.value)} />

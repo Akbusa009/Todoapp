@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import {
   ThemeProvider,
   CssBaseline,
@@ -7,11 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 import { getTheme } from "./theme";
-import BlankSidebar from "./components/BlankSidebar";
-import BlankNavbar from "./components/BlankNavbar";
+// import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
 import Column from "./components/Column";
 import "./index.css";
 import ControlsBar from "./components/ControlsBar";
+import { toast } from "react-toastify";
 
 import { getStoredToken, getStoredUser } from "./authClient";
 import { setAuthToken } from "./api";
@@ -44,7 +46,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if (!user) {
-        setTodos([]); 
+        setTodos([]);
         return;
       }
       try {
@@ -69,16 +71,18 @@ const App: React.FC = () => {
     try {
       const created = await apiCreateTodo({ ...payload, status });
       setTodos((prev) => [created, ...prev]);
+      toast.success("Task created successfully!");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("create_todo_failed:", err.message);
+        toast.error("Failed to create task. Please try again.");
       } else {
         console.error("create_todo_failed:", err);
+        toast.error("Failed to create task. Please try again.");
       }
     }
   };
 
-  // UPDATE
   const updateTodo = async (updated: Todo) => {
     try {
       const saved = await apiUpdateTodo(updated._id, {
@@ -91,25 +95,30 @@ const App: React.FC = () => {
         files: updated.files,
       });
       setTodos((prev) => prev.map((t) => (t._id === saved._id ? saved : t)));
+      toast.success("Task updated successfully!");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("update todo failed:", err.message);
+        toast.error("Failed to update task. Please try again.");
       } else {
         console.error("update todo failed:", err);
+        toast.error("Failed to update task. Please try again.");
       }
     }
   };
 
-  // DELETE
   const deleteTodo = async (id: string) => {
     try {
       await apiDeleteTodo(id);
       setTodos((prev) => prev.filter((t) => t._id !== id));
+      toast.success("Task deleted successfully!");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("delete todo failed:", err.message);
+        toast.error("Failed to delete task. Please try again.");
       } else {
         console.error("delete todo failed:", err);
+        toast.error("Failed to delete task. Please try again.");
       }
     }
   };
@@ -123,7 +132,7 @@ const App: React.FC = () => {
   const isInDateRange = (t: Todo) => {
     if (dateFilter === "All") return true;
     const createdAt = t.createdAt ? new Date(t.createdAt) : null;
-    if (!createdAt) return true; // if missing, don't filter out
+    if (!createdAt) return true;
     const now = new Date();
     if (dateFilter === "Today")
       return createdAt.toDateString() === now.toDateString();
@@ -166,29 +175,76 @@ const App: React.FC = () => {
     { title: "Done", todos: doneList, accent: "#16a34a", statusKey: "done" },
   ] as const;
 
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) return;
+
+    const sourceStatus = source.droppableId as Todo["status"];
+    const destStatus = destination.droppableId as Todo["status"];
+    const destIndex = destination.index;
+
+    setTodos((prev) => {
+      const current = [...prev];
+      const movingIndex = current.findIndex((t) => t._id === draggableId);
+      if (movingIndex === -1) return prev;
+
+      const movingTodo = { ...current[movingIndex], status: destStatus };
+      current.splice(movingIndex, 1);
+
+      const destList = current.filter((t) => t.status === destStatus);
+      const beforeId = destList[destIndex]?._id;
+      const insertIndex = beforeId ? current.findIndex((t) => t._id === beforeId) : current.length;
+      current.splice(insertIndex, 0, movingTodo);
+
+      if (sourceStatus !== destStatus) {
+        void updateTodo(movingTodo);
+      }
+
+      return current;
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box>
 
-        <BlankNavbar />
+        <Navbar />
 
-        <Box className="app-shell" sx={{ display: "flex", alignItems: "stretch" }}>
-          <BlankSidebar />
+        <Box
+          className="app-shell"
+          sx={{
+            display: "flex",
+            alignItems: "stretch",
+            height: "calc(100vh - 64px)",
+            overflow: "hidden",
+          }}
+        >
+          {/* <Sidebar /> */}
           <Box
             className="main-area"
             sx={{
-              background: "#FFFFFF",
-              minHeight: "100vh",
+              background: "rgba(255, 255, 255, 1)",
+              height: "100%",
               py: 6,
-              flex: 1, 
+              px: 0,
+              flex: 1,
+              overflowY: "auto",
             }}
           >
-            
-            <Container maxWidth="lg" disableGutters sx={{ pl: 0, pr: 3 }}>
+
+            <Container maxWidth="lg" disableGutters >
               <Box mb={3}>
                 <Box mb={1}>
-                  <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                  <Typography variant="h4" sx={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 600,
+                    fontSize: "46px",
+                    lineHeight: "100%",
+                    letterSpacing: "0px",
+                    color: "#0f172a",
+                    textTransform: "none",
+                  }}>
                     Todo App
                   </Typography>
                   <Typography sx={{ color: "rgba(15,23,42,0.6)" }}></Typography>
@@ -204,23 +260,25 @@ const App: React.FC = () => {
                 </Box>
               </Box>
 
-              <Box
-                className="columns"
-                sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}
-              >
-                {columns.map(({ title, todos, accent, statusKey }) => (
-                  <Column
-                    key={statusKey}
-                    title={title}
-                    todos={todos}
-                    accent={accent}
-                    statusKey={statusKey}
-                    onAdd={addTodo}
-                    onUpdate={updateTodo}
-                    onDelete={deleteTodo}
-                  />
-                ))}
-              </Box>
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Box
+                  className="columns"
+                  sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}
+                >
+                  {columns.map(({ title, todos, accent, statusKey }) => (
+                    <Column
+                      key={statusKey}
+                      title={title}
+                      todos={todos}
+                      accent={accent}
+                      statusKey={statusKey}
+                      onAdd={addTodo}
+                      onUpdate={updateTodo}
+                      onDelete={deleteTodo}
+                    />
+                  ))}
+                </Box>
+              </DragDropContext>
             </Container>
           </Box>
         </Box>

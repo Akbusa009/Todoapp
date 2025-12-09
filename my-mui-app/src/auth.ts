@@ -4,8 +4,8 @@ export interface UserData {
   password: string;
 }
 
-const USERS_KEY = "akshaybusa_users";
-const AUTH_KEY = "akshaybusa_auth_user";
+const USERS_KEY = "users";
+const AUTH_KEY = "auth_user";
 
 export const getUsers = (): UserData[] => {
   try {

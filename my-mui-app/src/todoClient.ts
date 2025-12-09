@@ -18,7 +18,6 @@ export interface Todo extends TodoPayload {
   updatedAt?: string;
 }
 
-// fetch all todos for current user
 export const fetchTodos = async (): Promise<Todo[]> => {
   const res = await client.get("/todos");
   return res.data;

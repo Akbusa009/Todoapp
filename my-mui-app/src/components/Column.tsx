@@ -13,13 +13,15 @@ import MenuItem from "@mui/material/MenuItem";
 import TodoCard from "./TodoCard";
 import type { Todo, TodoPayload } from "../todoClient";
 import Stack from "@mui/material/Stack";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { toast } from "react-toastify";
 
 interface ColumnProps {
   title: string;
   todos: Todo[];
   accent?: string;
-  statusKey: Todo["status"];
-  onAdd: (payload: Omit<TodoPayload, "status">, status: Todo["status"]) => void;
+  statusKey: NonNullable<Todo["status"]>;
+  onAdd: (payload: Omit<TodoPayload, "status">, status: NonNullable<Todo["status"]>) => void;
   onUpdate: (todo: Todo) => void;
   onDelete: (id: string) => void;
 }
@@ -40,7 +42,7 @@ const Column: React.FC<ColumnProps> = ({
   const [titleVal, setTitleVal] = useState("");
   const [descVal, setDescVal] = useState("");
   const [priorityVal, setPriorityVal] = useState<Todo["priority"]>("Low");
-  const [statusVal, setStatusVal] = useState<Todo["status"]>(statusKey);
+  const [statusVal, setStatusVal] = useState<NonNullable<Todo["status"]>>(statusKey);
 
   useEffect(() => {
     setStatusVal(statusKey);
@@ -60,7 +62,7 @@ const Column: React.FC<ColumnProps> = ({
     setTitleVal(todo.title);
     setDescVal(todo.description ?? "");
     setPriorityVal(todo.priority ?? "Low");
-    setStatusVal(todo.status);
+    setStatusVal(todo.status ?? statusKey);
     setOpen(true);
   };
 
@@ -70,7 +72,10 @@ const Column: React.FC<ColumnProps> = ({
   };
 
   const handleSave = () => {
-    if (!titleVal.trim()) return;
+    if (!titleVal.trim()) {
+      toast.warning("Please enter a task title.");
+      return;
+    }
     if (editing) {
       onUpdate({
         ...editing,
@@ -95,7 +100,21 @@ const Column: React.FC<ColumnProps> = ({
   };
 
   return (
-    <Box sx={{ width: 320, minWidth: 320, bgcolor: "#F5F5F5", borderRadius: 1, p: 2 }}>
+    <Box
+      sx={{
+        width: "344px",
+        minWidth:"340px",
+        bgcolor: "#F5F5F5",
+        borderRadius: "16px",
+        p: 2,
+        display: "flex",
+        flexDirection: "column",
+        mt:2,
+        height: "auto",
+        minHeight: "300px",
+        flexGrow: 1,
+      }}
+    >
       {/* Header Pill */}
       <Box
         sx={{
@@ -130,8 +149,8 @@ const Column: React.FC<ColumnProps> = ({
           </Typography>
           <Box
             sx={{
-              minWidth: 24,
-              height: 24,
+              minWidth: "20px",
+              height: "20px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -158,10 +177,11 @@ const Column: React.FC<ColumnProps> = ({
             size="small"
             onClick={openAdd}
             sx={{
-              width: 28,
-              height: 28,
+              width: "24px",
+              height: "24px",
               bgcolor: "rgba(99, 102, 241, 0.1)",
               color: accent,
+              borderRadius: "10px",
               "&:hover": {
                 bgcolor: "rgba(99, 102, 241, 0.2)",
               },
@@ -175,24 +195,52 @@ const Column: React.FC<ColumnProps> = ({
       {/* Accent Line */}
       <Box
         sx={{
-          height: 4,
-          borderRadius: 2,
+          height: 3,
+          borderRadius: 1,
           bgcolor: accent,
           mb: 2.5,
         }}
       />
 
-      {/* Cards Container */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-        {todos.map((t) => (
-          <TodoCard
-            key={t._id}
-            todo={t}
-            onEdit={openEdit}
-            onToggleComplete={() => onUpdate({ ...t, completed: !t.completed })}
-          />
-        ))}
-      </Box>
+      {/* Cards DnD */}
+      <Droppable droppableId={statusKey}>
+        {(dropProvided, snapshot) => (
+          <Box
+            ref={dropProvided.innerRef}
+            {...dropProvided.droppableProps}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2.5,
+              flex: 1,
+              minHeight: "40px",
+              transition: "background-color 150ms ease",
+              bgcolor: snapshot.isDraggingOver ? "rgba(99, 102, 241, 0.05)" : "transparent",
+              borderRadius: 2,
+              p: snapshot.isDraggingOver ? 1 : 0,
+            }}
+          >
+            {todos.map((t, index) => (
+              <Draggable key={t._id} draggableId={t._id} index={index}>
+                {(dragProvided) => (
+                  <Box
+                    ref={dragProvided.innerRef}
+                    {...dragProvided.draggableProps}
+                    {...dragProvided.dragHandleProps}
+                  >
+                    <TodoCard
+                      todo={t}
+                      onEdit={openEdit}
+                      onDelete={() => onDelete(t._id)}
+                    />
+                  </Box>
+                )}
+              </Draggable>
+            ))}
+            {dropProvided.placeholder}
+          </Box>
+        )}
+      </Droppable>
 
       {/* Dialog */}
       <Dialog
@@ -244,7 +292,7 @@ const Column: React.FC<ColumnProps> = ({
               label="Status"
               fullWidth
               value={statusVal}
-              onChange={(e) => setStatusVal(e.target.value as Todo["status"])}
+              onChange={(e) => setStatusVal(e.target.value as NonNullable<Todo["status"]>)}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
